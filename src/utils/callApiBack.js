@@ -19,9 +19,10 @@ export async function postDijkstraCalculation(startNode, endNode) {
                 end: endNode
             })
         })
-        const result = await response.json()
-
-        //TODO : Faire le traitement de la réponse
+        if (!response.ok) {
+            throw new Error('Network response was not ok')
+        }
+        return await response.json()
 
     } catch (error) {
         console.error('Error fetching GeoJSON data:', error)

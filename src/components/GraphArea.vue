@@ -78,18 +78,64 @@ const initGraph = (graphParsed) => {
       n.style('background-color', defaultColor)
       n.data('state', null)
     })
+    cy.edges().forEach(edge => {
+      edge.style('line-color', '#000')
+      edge.style('width', 2)
+    })
     startNode = null
     endNode = null
   })
 
-  window.addEventListener('run-dijkstra', () => {
+  window.addEventListener('run-dijkstra', async () => {
     if (!startNode || !endNode) {
       alert('You need to select a start and end node before running the algorithm.')
       return
     }
-    postDijkstraCalculation(startNode, endNode)
+    let result = await postDijkstraCalculation(startNode, endNode)
+    if (result) {
+      alert(`The shortest route is: ${result.path.join(' → ')}\nWith a weight of: ${result.weight}`);
+      highlightEdgesInPath(result.path);
+      highlightNodesInPath(result.path);
+    } else {
+      alert('Error: No result from the server.')
+    }
   })
 }
+
+function highlightEdgesInPath(path) {
+  cy.edges().forEach(edge => {
+    const source = edge.data('source');
+    const target = edge.data('target');
+
+    let isInPath = false;
+    for (let i = 0; i < path.length - 1; i++) {
+      if (
+        (path[i] === source && path[i + 1] === target) ||
+        (path[i] === target && path[i + 1] === source)
+      ) {
+        isInPath = true;
+        break;
+      }
+    }
+
+    if (isInPath) {
+      edge.style('line-color', '#df6704');
+      edge.style('width', 3);
+    } else {
+      edge.style('line-color', '#000');
+      edge.style('width', 2);
+    }
+  });
+}
+
+function highlightNodesInPath(path) {
+  cy.nodes().forEach(node => {
+    if (path.includes(node.id()) && node.data('state') !== 'start' && node.data('state') !== 'end') {
+      node.style('background-color', '#facc15'); // jaune
+    }
+  });
+}
+
 
 onMounted(async () => {
   const resultGraphGeoJson = await getGraphInit();
