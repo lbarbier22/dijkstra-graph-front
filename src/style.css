@@ -41,22 +41,43 @@ h1 {
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.25s;
+  transition: background-color 0.3s, transform 0.1s;
+  color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   justify-content: center;
 }
 
-button:hover {
-  border-color: #646cff;
+.btn-start {
+  background-color: #8BC34A;
+  border: 2px solid #4CAF50;
+  font-size: 1.2em;
+  padding: 0.8em 1.6em;
 }
+
+.btn-reset {
+  background-color: #ff9800;
+  border: 2px solid #e65100;
+}
+
+.btn-start:hover {
+  background-color: #7CB342;
+}
+
+.btn-reset:hover {
+  background-color: #fb8c00;
+}
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+button:active {
+  transform: scale(0.98);
 }
 
 .container {
