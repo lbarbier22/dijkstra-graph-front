@@ -2,7 +2,7 @@
 import cytoscape from 'cytoscape'
 import { onMounted } from 'vue'
 import { parseGeoJSONToCytoscapeElements } from '../utils/parseGeojson.js'
-import { getGraphInit } from '../utils/callApiBack.js'
+import {getGraphInit, postDijkstraCalculation} from '../utils/callApiBack.js'
 
 let cy
 let startNode = null
@@ -63,11 +63,11 @@ const initGraph = (graphParsed) => {
     } else if (!startNode) {
       node.style('background-color', startColor)
       node.data('state', 'start')
-      startNode = node
+      startNode = node.data('id')
     } else if (!endNode) {
       node.style('background-color', endColor)
       node.data('state', 'end')
-      endNode = node
+      endNode = node.data('id')
     } else {
       alert('You have already select a start and an end.\nYou have to cancel one of them first.')
     }
@@ -87,7 +87,7 @@ const initGraph = (graphParsed) => {
       alert('You need to select a start and end node before running the algorithm.')
       return
     }
-    alert('Dijkstra not implemented yet.')
+    postDijkstraCalculation(startNode, endNode)
   })
 }
 
