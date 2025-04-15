@@ -1,6 +1,8 @@
 <script setup>
 import cytoscape from 'cytoscape'
 import { onMounted } from 'vue'
+import { parseGeoJSONToCytoscapeElements } from '../utils/parseGeojson.js'
+import { getGraphInit } from '../utils/callApiBack.js'
 
 let cy
 let startNode = null
@@ -10,37 +12,10 @@ const defaultColor = '#D1D5DB'
 const startColor = '#10B981'
 const endColor = '#EF4444'
 
-const initGraph = () => {
+const initGraph = (graphParsed) => {
   cy = cytoscape({
     container: document.getElementById('cy'),
-    elements: [
-      //Nodes
-      { data: { id: 'A' }, position: { x: 150, y: 100 } },
-      { data: { id: 'B' }, position: { x: 250, y: 200 } },
-      { data: { id: 'C' }, position: { x: 50, y: 200 } },
-      { data: { id: 'D' }, position: { x: 300, y: 350 } },
-      { data: { id: 'E' }, position: { x: 150, y: 300 } },
-      { data: { id: 'F' }, position: { x: 0, y: 300 } },
-      { data: { id: 'A' }, position: { x: 200, y: 100 } },
-      { data: { id: 'B' }, position: { x: 300, y: 200 } },
-      { data: { id: 'C' }, position: { x: 100, y: 200 } },
-      { data: { id: 'D' }, position: { x: 350, y: 350 } },
-      { data: { id: 'E' }, position: { x: 200, y: 300 } },
-      { data: { id: 'F' }, position: { x: 50, y: 300 } },
-      { data: { id: 'G' }, position: { x: 100, y: 400 } },
-
-      //Lines
-      { data: { id: 'AC', source: 'A', target: 'C', weight: 3 } },
-      { data: { id: 'AB', source: 'A', target: 'B', weight: 3 } },
-      { data: { id: 'CE', source: 'C', target: 'E', weight: 2.8 } },
-      { data: { id: 'BE', source: 'B', target: 'E', weight: 2.8 } },
-      { data: { id: 'BD', source: 'B', target: 'D', weight: 3.5 } },
-      { data: { id: 'ED', source: 'E', target: 'D', weight: 3.1 } },
-      { data: { id: 'EG', source: 'E', target: 'G', weight: 7 } },
-      { data: { id: 'GD', source: 'G', target: 'D', weight: 10 } },
-      { data: { id: 'CF', source: 'C', target: 'F', weight: 3.5 } },
-      { data: { id: 'FG', source: 'F', target: 'G', weight: 2.5 } }
-    ],
+    elements: graphParsed,
     style: [
       {
         selector: 'node',
@@ -116,8 +91,10 @@ const initGraph = () => {
   })
 }
 
-onMounted(() => {
-  initGraph()
+onMounted(async () => {
+  const resultGraphGeoJson = await getGraphInit();
+  const graphParsed = parseGeoJSONToCytoscapeElements(resultGraphGeoJson)
+  initGraph(graphParsed)
 })
 </script>
 
