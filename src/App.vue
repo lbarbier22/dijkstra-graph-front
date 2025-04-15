@@ -17,10 +17,8 @@ const resetGraph = () => {
       <GraphArea />
     </div>
     <div class="buttons">
-      <button @click="startAlgo">START</button>
-      <button @click="resetGraph">RESET</button>
+      <button @click="startAlgo" class="btn-start">START</button>
+      <button @click="resetGraph" class="btn-reset">RESET</button>
     </div>
   </div>
 </template>
-
-
