@@ -1,16 +1,18 @@
 <script setup>
 import cytoscape from 'cytoscape'
-import { onMounted } from 'vue'
+import { onMounted, ref} from 'vue'
 import { parseGeoJSONToCytoscapeElements } from '../utils/parseGeojson.js'
 import {getGraphInit, postDijkstraCalculation} from '../utils/callApiBack.js'
 
 let cy
 let startNode = null
+let stepNode = null
 let endNode = null
 
 const defaultColor = '#D1D5DB'
 const startColor = '#10B981'
 const endColor = '#EF4444'
+const dijkstraResult = ref(null)
 
 const initGraph = (graphParsed) => {
   cy = cytoscape({
@@ -50,6 +52,7 @@ const initGraph = (graphParsed) => {
     }
   })
 
+  //handle left click on node
   cy.on('tap', 'node', (e) => {
     const node = e.target
     if (node.data('state') === 'start') {
@@ -73,6 +76,30 @@ const initGraph = (graphParsed) => {
     }
   })
 
+  //handle right click on node
+  cy.on('cxttap', 'node', (e) => {
+    const node = e.target
+    if (node.data('state') === 'step') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      stepNode = null
+    } else if (node.data('state') === 'start') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      startNode = null
+    } else if (node.data('state') === 'end') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      endNode = null
+    } else {
+      const node = e.target
+      node.style('background-color', '#df6704')
+      node.data('state', 'step')
+      stepNode = node.data('id')
+    }
+
+  })
+
   window.addEventListener('reset-graph', () => {
     cy.nodes().forEach(n => {
       n.style('background-color', defaultColor)
@@ -91,9 +118,9 @@ const initGraph = (graphParsed) => {
       alert('You need to select a start and end node before running the algorithm.')
       return
     }
-    let result = await postDijkstraCalculation(startNode, endNode)
+    let result = await postDijkstraCalculation(startNode, endNode, stepNode)
     if (result) {
-      alert(`The shortest route is: ${result.path.join(' → ')}\nWith a weight of: ${result.weight}`);
+      dijkstraResult.value = `The shortest route is: ${result.path.join(' → ')}\nWith a weight of: ${result.weight}`;
       highlightEdgesInPath(result.path);
       highlightNodesInPath(result.path);
     } else {
@@ -130,7 +157,9 @@ function highlightEdgesInPath(path) {
 
 function highlightNodesInPath(path) {
   cy.nodes().forEach(node => {
-    if (path.includes(node.id()) && node.data('state') !== 'start' && node.data('state') !== 'end') {
+    if (path.includes(node.id()) && node.data('state') !== 'start'
+        && node.data('state') !== 'end'
+        && node.data('state') !== 'step') {
       node.style('background-color', '#facc15'); // jaune
     }
   });
@@ -146,6 +175,9 @@ onMounted(async () => {
 
 <template>
   <div id="cy"/>
+  <div v-if="dijkstraResult" style="white-space: pre-line; margin-bottom: 10px; font-weight: bold;">
+    {{ dijkstraResult }}
+  </div>
 </template>
 
 <style>
