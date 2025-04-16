@@ -9,14 +9,15 @@ export async function getGraphInit() {
     }
 }
 
-export async function postDijkstraCalculation(startNode, endNode) {
+export async function postDijkstraCalculation(startNode, endNode, stepNode) {
     try {
         const response = await fetch('http://localhost:3000/api/dijkstra', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 start: startNode,
-                end: endNode
+                end: endNode,
+                step: stepNode
             })
         })
         if (!response.ok) {
