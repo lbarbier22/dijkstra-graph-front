@@ -11,22 +11,14 @@ export async function getGraphInit() {
 
 export async function postDijkstraCalculation(startNode, endNode, stepNode) {
     try {
-        const response = await fetch('http://localhost:3000/api/dijkstra', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                start: startNode,
-                end: endNode,
-                step: stepNode
-            })
-        })
-        if (!response.ok) {
-            throw new Error('Network response was not ok')
-        }
-        return await response.json()
-
+        const response = await axios.post('http://localhost:3000/api/dijkstra', {
+            start: startNode,
+            end: endNode,
+            step: stepNode
+        });
+        return response.data;
     } catch (error) {
-        console.error('Error fetching GeoJSON data:', error)
+        console.error('Error posting Dijkstra calculation:', error);
     }
 }
 

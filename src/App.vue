@@ -19,8 +19,8 @@ const resetGraph = () => {
 
 <template>
   <div class="min-h-screen bg-gray-300 flex flex-col items-center justify-center p-4">
-    <h1 class="text-4xl font-bold mb-6">Dijkstra</h1>
-    <div class="bg-white p-4 rounded-xl shadow-md">
+    <h1 class="rainbow-hover text-4xl font-bold mb-6">Dijkstra</h1>
+    <div class="graph-card bg-white p-4 rounded-xl shadow-md">
       <GraphArea />
     </div>
     <div class="buttons flex flex-col items-center mb-4">
