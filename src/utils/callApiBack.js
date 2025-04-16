@@ -29,3 +29,12 @@ export async function postDijkstraCalculation(startNode, endNode, stepNode) {
         console.error('Error fetching GeoJSON data:', error)
     }
 }
+
+export async function getRandomGraph(numberOfNodes) {
+    try {
+        const response = await axios.get(`http://localhost:3000/api/graph/random?numberOfNodes=${numberOfNodes}`)
+        return response.data
+    } catch (error) {
+        console.error('Error fetching GeoJSON data:', error)
+    }
+}

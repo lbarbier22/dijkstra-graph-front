@@ -41,7 +41,8 @@ h1 {
 
 button {
   border-radius: 8px;
-  padding: 0.6em 1.2em;
+  padding: 0.6em 2em;
+  margin: 0.5em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
@@ -55,13 +56,22 @@ button {
 .btn-start {
   background-color: #8BC34A;
   border: 2px solid #4CAF50;
-  font-size: 1.2em;
-  padding: 0.8em 1.6em;
+  font-size: 1.5em;
+  padding: 0.8em 2.2em;
 }
 
 .btn-reset {
   background-color: #ff9800;
   border: 2px solid #e65100;
+}
+
+.btn-generate {
+  background-color: #f33131;
+  border: 2px solid #8a1b1b;
+}
+
+.btn-generate:hover {
+  background-color: #c10e0e;
 }
 
 .btn-start:hover {
@@ -96,4 +106,27 @@ button:active {
 
 .card {
   padding: 2em;
+}
+
+.formNumberOfNodes {
+  display: flex;
+  margin-top: 0.5em;
+  padding: 0.2em;
+  flex-direction: column;
+  font-size: 1em;
+  text-align: center;
+  border: 2px solid #8a1b1b;
+  background-color: #f40000;
+  border-radius: 0.5em;
+  align-items: center;
+  gap: 1rem;
+}
+
+.divForm {
+  display: flex;
+  margin-top: 0.5em;
+  padding: 0.2em;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
 }
