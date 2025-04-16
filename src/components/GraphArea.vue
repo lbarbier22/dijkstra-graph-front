@@ -2,11 +2,11 @@
 import cytoscape from 'cytoscape'
 import { onMounted, ref} from 'vue'
 import { parseGeoJSONToCytoscapeElements } from '../utils/parseGeojson.js'
-import {getGraphInit, postDijkstraCalculation} from '../utils/callApiBack.js'
+import {getGraphInit, getRandomGraph, postDijkstraCalculation} from '../utils/callApiBack.js'
 
 let cy
 let startNode = null
-let stepNode = null
+let stepNodes = []
 let endNode = null
 
 const defaultColor = '#D1D5DB'
@@ -14,10 +14,10 @@ const startColor = '#10B981'
 const endColor = '#EF4444'
 const dijkstraResult = ref(null)
 
-const initGraph = (graphParsed) => {
+const cytoScapeGraph = (initGraphParsed) => {
   cy = cytoscape({
     container: document.getElementById('cy'),
-    elements: graphParsed,
+    elements: initGraphParsed,
     style: [
       {
         selector: 'node',
@@ -48,7 +48,7 @@ const initGraph = (graphParsed) => {
       }
     ],
     layout: {
-      name: 'preset'
+      name: 'cose'
     }
   })
 
@@ -82,7 +82,7 @@ const initGraph = (graphParsed) => {
     if (node.data('state') === 'step') {
       node.style('background-color', defaultColor)
       node.data('state', null)
-      stepNode = null
+      stepNodes = stepNodes.filter(id => id !== node.data('id'));
     } else if (node.data('state') === 'start') {
       node.style('background-color', defaultColor)
       node.data('state', null)
@@ -92,10 +92,11 @@ const initGraph = (graphParsed) => {
       node.data('state', null)
       endNode = null
     } else {
-      const node = e.target
       node.style('background-color', '#df6704')
       node.data('state', 'step')
-      stepNode = node.data('id')
+      if (!stepNodes.includes(node.data('id'))) {
+        stepNodes.push(node.data('id'));
+      }
     }
 
   })
@@ -111,6 +112,7 @@ const initGraph = (graphParsed) => {
     })
     startNode = null
     endNode = null
+    stepNodes = []
   })
 
   window.addEventListener('run-dijkstra', async () => {
@@ -118,7 +120,7 @@ const initGraph = (graphParsed) => {
       alert('You need to select a start and end node before running the algorithm.')
       return
     }
-    let result = await postDijkstraCalculation(startNode, endNode, stepNode)
+    let result = await postDijkstraCalculation(startNode, endNode, stepNodes)
     if (result) {
       dijkstraResult.value = `The shortest route is: ${result.path.join(' → ')}\nWith a weight of: ${result.weight}`;
       highlightEdgesInPath(result.path);
@@ -126,6 +128,17 @@ const initGraph = (graphParsed) => {
     } else {
       alert('Error: No result from the server.')
     }
+  })
+
+  window.addEventListener('generate-graph', async (e) => {
+    const nodeCount = e.detail
+    let result = await getRandomGraph(nodeCount)
+    cy.remove('node')
+    cy.add(parseGeoJSONToCytoscapeElements(result))
+    startNode = null
+    endNode = null
+    stepNodes = []
+    cy.layout({ name: 'cose' }).run()
   })
 }
 
@@ -157,10 +170,20 @@ function highlightEdgesInPath(path) {
 
 function highlightNodesInPath(path) {
   cy.nodes().forEach(node => {
+    node.style('background-color', defaultColor);
     if (path.includes(node.id()) && node.data('state') !== 'start'
         && node.data('state') !== 'end'
         && node.data('state') !== 'step') {
-      node.style('background-color', '#facc15'); // jaune
+      node.style('background-color', '#facc15');
+    } else if (node.data('state') === 'start') {
+      node.style('background-color', startColor);
+    } else if (node.data('state') === 'end') {
+      node.style('background-color', endColor);
+    } else if (node.data('state') === 'step') {
+      node.style('background-color', '#df6704');
+    }
+    else {
+      node.style('background-color', defaultColor);
     }
   });
 }
@@ -169,13 +192,16 @@ function highlightNodesInPath(path) {
 onMounted(async () => {
   const resultGraphGeoJson = await getGraphInit();
   const graphParsed = parseGeoJSONToCytoscapeElements(resultGraphGeoJson)
-  initGraph(graphParsed)
+  cytoScapeGraph(graphParsed)
 })
 </script>
 
 <template>
   <div id="cy"/>
-  <div v-if="dijkstraResult" style="white-space: pre-line; margin-bottom: 10px; font-weight: bold;">
+  <div
+      v-if="dijkstraResult"
+      style="white-space: pre-line; margin-bottom: 10px; font-weight: bold; max-width: 600px; word-wrap: break-word;"
+  >
     {{ dijkstraResult }}
   </div>
 </template>
