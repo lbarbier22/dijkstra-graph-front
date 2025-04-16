@@ -6,6 +6,7 @@ import {getGraphInit, postDijkstraCalculation} from '../utils/callApiBack.js'
 
 let cy
 let startNode = null
+let stepNode = null
 let endNode = null
 
 const defaultColor = '#D1D5DB'
@@ -71,6 +72,29 @@ const initGraph = (graphParsed) => {
     } else {
       alert('You have already select a start and an end.\nYou have to cancel one of them first.')
     }
+  })
+
+  cy.on('cxttap', 'node', (e) => {
+    const node = e.target
+    if (node.data('state') === 'step') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      stepNode = null
+    } else if (node.data('state') === 'start') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      startNode = null
+    } else if (node.data('state') === 'end') {
+      node.style('background-color', defaultColor)
+      node.data('state', null)
+      endNode = null
+    } else {
+      const node = e.target
+      node.style('background-color', '#df6704')
+      node.data('state', 'step')
+      stepNode = node.data('id')
+    }
+
   })
 
   window.addEventListener('reset-graph', () => {
