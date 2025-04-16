@@ -15,6 +15,7 @@ const startColor = '#10B981'
 const endColor = '#EF4444'
 const stepColor = '#DF6704'
 const dijkstraResult = ref(null)
+const errorMessage = ref(null)
 
 function resetNodeStyle(node) {
   node.style('background-color', defaultColor);
@@ -194,34 +195,45 @@ const cytoScapeGraph = (initGraphParsed) => {
 
   window.addEventListener('run-dijkstra', async () => {
     if (!startNode || !endNode) {
-      alert('You need to select a start and end node before running the algorithm.')
-      return
+      errorMessage.value = 'You need to select a start and end node before running the algorithm.';
+      return;
     }
-    let result = await postDijkstraCalculation(startNode, endNode, stepNodes)
-    if (result) {
-      dijkstraResult.value = `The shortest route is: ${result.path.join(' → ')}\nWith a weight of: ${result.weight}`;
-      highlightEdgesInPath(result.path);
-      highlightNodesInPath(result.path);
+
+    let result = await postDijkstraCalculation(startNode, endNode, stepNodes);
+    if (result.success) {
+      errorMessage.value = null;
+      dijkstraResult.value = 'The shortest route is: ' + result.data.path.join(" → ") + '\nWith a weight of: ' + result.data.weight;
+      highlightEdgesInPath(result.data.path);
+      highlightNodesInPath(result.data.path);
     } else {
-      alert('Error: No result from the server.')
+      dijkstraResult.value = null;
+      errorMessage.value = result.message;
     }
-  })
+  });
 
   window.addEventListener('generate-graph', async (e) => {
     const nodeCount = e.detail
     let result = await getRandomGraph(nodeCount)
-    cy.remove('node')
-    cy.add(parseGeoJSONToCytoscapeElements(result))
-    startNode = null
-    endNode = null
-    stepNodes = []
-    cy.layout({ name: 'cose' }).run()
+    if (result.success) {
+      cy.remove('node')
+      cy.add(parseGeoJSONToCytoscapeElements(result.data))
+      startNode = null
+      endNode = null
+      stepNodes = []
+      cy.layout({ name: 'cose' }).run()
+    } else {
+      errorMessage.value = result.message;
+    }
   })
 }
 
 onMounted(async () => {
   const resultGraphGeoJson = await getGraphInit();
-  const graphParsed = parseGeoJSONToCytoscapeElements(resultGraphGeoJson)
+  if (!resultGraphGeoJson.success) {
+    errorMessage.value = resultGraphGeoJson.message;
+    return;
+  }
+  const graphParsed = parseGeoJSONToCytoscapeElements(resultGraphGeoJson.data)
   cytoScapeGraph(graphParsed)
 })
 </script>
@@ -230,5 +242,8 @@ onMounted(async () => {
   <div id="cy"/>
   <div class="graph-result" v-if="dijkstraResult">
     {{ dijkstraResult }}
+  </div>
+  <div class="error-message" v-if="errorMessage">
+    <p>Error: {{ errorMessage }}</p>
   </div>
 </template>
