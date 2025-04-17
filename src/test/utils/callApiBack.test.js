@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import axios from 'axios'
-import { getGraphInit, postDijkstraCalculation, getRandomGraph } from '../../utils/callApiBack.js'
+import { getGraphInit, postDijkstraCalculation, getRandomGraph, generateGraph } from '../../utils/callApiBack.js'
 
 vi.mock('axios')
 
@@ -99,6 +99,35 @@ describe('getRandomGraph', () => {
         axios.get.mockRejectedValue(new Error('Network Error'))
 
         const result = await getRandomGraph(5)
+        expect(result.success).toBe(false)
+        expect(result.message).toBe('Error generating a new graph : Network Error')
+    })
+})
+
+describe('generateGraph', () => {
+    test('doit retourner les données si le statut est 200', async () => {
+        const mockGeoJson = { type: 'FeatureCollection', features: [] }
+        axios.post.mockResolvedValue({ status: 200, data: { nodes: ['A'], edges: [] } })
+
+        const result = await generateGraph(mockGeoJson)
+        expect(result.success).toBe(true)
+        expect(result.data).toEqual({ nodes: ['A'], edges: [] })
+    })
+
+    test('doit retourner une erreur si le statut est pas 200', async () => {
+        const mockGeoJson = { type: 'FeatureCollection', features: [] }
+        axios.post.mockResolvedValue({ status: 500, data: 'Internal Server Error' })
+
+        const result = await generateGraph(mockGeoJson)
+        expect(result.success).toBe(false)
+        expect(result.message).toBe('Unexpected response status: Internal Server Error')
+    })
+
+    test('doit gérer les erreurs réseau', async () => {
+        const mockGeoJson = { type: 'FeatureCollection', features: [] }
+        axios.post.mockRejectedValue(new Error('Network Error'))
+
+        const result = await generateGraph(mockGeoJson)
         expect(result.success).toBe(false)
         expect(result.message).toBe('Error generating a new graph : Network Error')
     })

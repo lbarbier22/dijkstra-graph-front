@@ -55,4 +55,32 @@ describe('App.vue', () => {
         await input.setValue(222)
         expect(wrapper.vm.nodeCount).toBe(222)
     })
+
+    it('met à jour geojsonText et déclenche generate-graph avec le contenu du textarea', async () => {
+        const wrapper = mount(App)
+
+        const mockGeoJson = {
+            type: 'FeatureCollection',
+            features: []
+        }
+
+        const textarea = wrapper.find('#geojson-text')
+        await textarea.setValue(JSON.stringify(mockGeoJson))
+
+        await wrapper.find('button.geojson-button').trigger('click')
+
+        expect(spyDispatchEvent).toHaveBeenCalledWith(
+            new CustomEvent('generate-graph', { detail: mockGeoJson })
+        )
+    })
+
+    it('affiche une erreur si le JSON est invalide', async () => {
+        window.alert = vi.fn()
+        const wrapper = mount(App)
+
+        await wrapper.find('#geojson-text').setValue('{ invalid json')
+        await wrapper.find('button.geojson-button').trigger('click')
+
+        expect(window.alert).toHaveBeenCalledWith('Invalid GeoJSON format.')
+    })
 })
