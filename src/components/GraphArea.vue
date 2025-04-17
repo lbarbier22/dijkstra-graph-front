@@ -2,7 +2,7 @@
 import cytoscape from 'cytoscape'
 import { onMounted, ref } from 'vue'
 import { parseGeoJSONToCytoscapeElements } from '../utils/parseGeojson.js'
-import { getGraphInit, getRandomGraph, postDijkstraCalculation } from '../utils/callApiBack.js'
+import { generateGraph, getGraphInit, getRandomGraph, postDijkstraCalculation } from '../utils/callApiBack.js'
 import styleCytoScape from '../assets/style/styleCytoScape.json'
 
 let cy
@@ -118,12 +118,6 @@ function highlightNodesInPath(path) {
   });
 }
 
-function importGraphStyle(styleJson) {
-  if (cy && styleJson) {
-    cy.style(styleJson);
-  }
-}
-
 const cytoScapeGraph = (initGraphParsed) => {
   cy = cytoscape({
     container: document.getElementById('cy'),
@@ -211,7 +205,7 @@ const cytoScapeGraph = (initGraphParsed) => {
     }
   });
 
-  window.addEventListener('generate-graph', async (e) => {
+  window.addEventListener('random-graph', async (e) => {
     const nodeCount = e.detail
     let result = await getRandomGraph(nodeCount)
     if (result.success) {
@@ -223,6 +217,22 @@ const cytoScapeGraph = (initGraphParsed) => {
       cy.layout({ name: 'cose' }).run()
     } else {
       errorMessage.value = result.message;
+    }
+  })
+
+  window.addEventListener('generate-graph', async (e) => {
+    const geoJson = e.detail
+    let result = await generateGraph(geoJson)
+    if (result.success) {
+      cy.remove('node')
+      const parsed = parseGeoJSONToCytoscapeElements(result.data)
+      cy.add(parsed)
+      startNode = null
+      endNode = null
+      stepNodes = []
+      cy.layout({ name: 'preset' }).run()
+    } else {
+      errorMessage.value = result.message
     }
   })
 }
