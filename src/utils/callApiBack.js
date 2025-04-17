@@ -53,3 +53,17 @@ export async function getRandomGraph(numberOfNodes) {
         return { success: false, message: 'Error generating a new graph : ' + error.message };
     }
 }
+
+export async function generateGraph(geoJson) {
+    try {
+        const response = await axios.post('http://localhost:3000/api/graph/generate', {
+            geoJson: geoJson
+        });
+        if (response.status !== 200) {
+            return { success: false, message: 'Unexpected response status: ' + response.data };
+        }
+        return { success: true, data: response.data };
+    } catch (error) {
+        return { success: false, message: 'Error generating a new graph : ' + error.message };
+    }
+}

@@ -100,21 +100,39 @@ describe('GraphArea.vue', () => {
 
     it('génère un nouveau graphe avec generate-graph', async () => {
         const addSpy = vi.fn()
+        const removeSpy = vi.fn()
+        const layoutRunSpy = vi.fn()
+
         vi.spyOn(api, 'getGraphInit').mockResolvedValue({ success: true, data: { features: [] } })
         vi.spyOn(geoUtils, 'parseGeoJSONToCytoscapeElements').mockReturnValue([{ data: { id: '1' } }])
-        vi.spyOn(api, 'getRandomGraph').mockResolvedValue({ success: true, data: {} })
+        vi.spyOn(api, 'generateGraph').mockResolvedValue({ success: true, data: { features: [{ type: 'Feature' }] } })
 
         const wrapper = mount(GraphArea)
         await flushPromises()
 
         wrapper.vm.cy.add = addSpy
-        wrapper.vm.cy.remove = vi.fn()
-        wrapper.vm.cy.layout = () => ({ run: vi.fn() })
+        wrapper.vm.cy.remove = removeSpy
+        wrapper.vm.cy.layout = () => ({ run: layoutRunSpy })
 
-        window.dispatchEvent(new CustomEvent('generate-graph', { detail: 30 }))
+        const mockGeoJson = { type: 'FeatureCollection', features: [] }
+        window.dispatchEvent(new CustomEvent('generate-graph', { detail: mockGeoJson }))
         await flushPromises()
 
-        expect(api.getRandomGraph).toHaveBeenCalledWith(30)
+        expect(api.generateGraph).toHaveBeenCalledWith(mockGeoJson)
+        expect(removeSpy).toHaveBeenCalled()
         expect(addSpy).toHaveBeenCalled()
+        expect(layoutRunSpy).toHaveBeenCalled()
+    })
+
+    it('affiche une erreur si generateGraph échoue', async () => {
+        vi.spyOn(api, 'getGraphInit').mockResolvedValue({ success: true, data: { features: [] } })
+        vi.spyOn(api, 'generateGraph').mockResolvedValue({ success: false, message: 'Bad geoJson' })
+        const wrapper = mount(GraphArea)
+        await flushPromises()
+
+        window.dispatchEvent(new CustomEvent('generate-graph', { detail: {} }))
+        await flushPromises()
+
+        expect(wrapper.text()).toContain('Bad geoJson')
     })
 })
