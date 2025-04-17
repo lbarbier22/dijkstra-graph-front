@@ -1,0 +1,29 @@
+[
+  {
+    "selector": "node",
+    "style": {
+      "label": "data(id)",
+      "text-valign": "center",
+      "text-halign": "center",
+      "background-color": "#D1D5DB",
+      "color": "#000",
+      "font-size": "16px",
+      "width": 40,
+      "height": 40,
+      "border-width": 2,
+      "border-color": "#000"
+    }
+  },
+  {
+    "selector": "edge",
+    "style": {
+      "width": 2,
+      "line-color": "#000",
+      "target-arrow-shape": "none",
+      "label": "data(weight)",
+      "font-size": "16px",
+      "text-rotation": "autorotate",
+      "text-margin-y": -15
+    }
+  }
+]
