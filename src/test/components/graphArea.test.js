@@ -74,7 +74,8 @@ describe('GraphArea.vue', () => {
         window.dispatchEvent(new Event('run-dijkstra'))
         await flushPromises()
 
-        expect(wrapper.text()).toContain('The shortest route is: A → B → C')
+        expect(wrapper.text()).toContain('The shortest route is : A → B → C\n' +
+            'With a weight of : 42')
     })
 
     it('affiche une erreur si Dijkstra échoue', async () => {

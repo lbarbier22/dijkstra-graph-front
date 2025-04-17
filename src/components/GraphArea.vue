@@ -202,7 +202,7 @@ const cytoScapeGraph = (initGraphParsed) => {
     let result = await postDijkstraCalculation(startNode, endNode, stepNodes);
     if (result.success) {
       errorMessage.value = null;
-      dijkstraResult.value = 'The shortest route is: ' + result.data.path.join(" → ") + '\nWith a weight of: ' + result.data.weight;
+      dijkstraResult.value = 'The shortest route is : ' + result.data.path.join(" → ") + '\nWith a weight of : ' + result.data.weight + '\nIt tooks ' + result.data.time + 'ms';
       highlightEdgesInPath(result.data.path);
       highlightNodesInPath(result.data.path);
     } else {
