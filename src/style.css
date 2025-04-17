@@ -32,11 +32,13 @@
   color: white; /* fallback */
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  transition: background-position 1s ease;
+  transition: background-position 1s ease, transform 0.4s;
+
 }
 
 .rainbow-hover:hover {
   animation: rainbowFlow 2s linear infinite;
+  transform: scale(1.15);
 }
 
 @keyframes rainbowFlow {
@@ -110,7 +112,7 @@ button {
 }
 
 button:hover {
-  transform: scale(1.05); /* effet zoom */
+  transform: scale(1.05);
 }
 
 .btn-generate:hover {
